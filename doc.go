@@ -3,33 +3,29 @@ muts - Go package with utilities to create Make-like files in Go
 
 Example of a make.go
 
+	package main
+
+	import (
+		"flag"
+		. "github.com/bolcom/muts"
+	)
+
+	var BuildNumber = flag.String("buildnumber", "0", "build sequence number")
+
 	func main() {
 		flag.Parse()
-		if len(*DeployableVersion) == 0 || len(*BuildNumber) == 0 || len(*BuildDate) == 0 {
-			log.Fatal("one of the required flags is missing")
-		}
 		Tasks["clean"] = taskClean
-		Tasks["build"] = taskBuild
-		Tasks["compile"] = taskCompile
-		Tasks["compile_tester"] = taskCompileTester
-		Tasks["compile_dbtester"] = taskCompileDBTester
-		Tasks["compile_composer"] = taskCompileComposer
-		Tasks["apidocs"] = func() { Call("tar -zcf ./target/swagger.tar.gz swagger") }
-		Tasks["dashboard"] = func() { Call("tar -zcf ./target/gui.tar.gz dashboard") }
 		Tasks["readme"] = func() { Call("cp -v readme.md ./target/") }
-		Tasks["startsh"] = func() { Call("cp -v start.sh ./target/") }
-		Tasks["db"] = taskArchiveDB
-		Tasks["app"] = taskArchiveApp
-		Tasks["standalone"] = taskStandalone
-		Tasks["unit"] = func() { Call("godep go test ./internal/...") }
-		Tasks["local"] = func() { Call("godep go build -o target/boqs main.go") }
-		Tasks["publish"] = taskPublish
+		Tasks["build"] = taskBuild
 		RunTasksFromArgs()
 	}
 
-Use 	it like this
+	func taskClean() { ... }
+	func taskBuild() { ... }
 
-	go run make.go -version=1.1.1.1 -buildnumber=42 -builddate=`date +%Y:%m:%d.%H:%M:%S` build
+Use	it like this
+
+	go run make.go -buildnumber=42 build
 
 
 Some background
