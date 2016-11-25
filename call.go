@@ -8,24 +8,32 @@ import (
 	"strings"
 )
 
+var execCommand = exec.Command
+
 // Call runs a Command composed of the parameters given.
 // If only one parameter is given then interpret that as a single command line.
 // Abort the program if a call fails.
-func Call(params ...string) int { return WaitCall(true, params...) }
+func Call(params ...interface{}) int { return WaitCall(true, false, params...) }
+
+func CallForce(params ...interface{}) int { return WaitCall(true, true, params...) }
 
 // WaitCall is the same as Call but has the option to wait for completion.
 // Returns the process ID if not waiting and then 0 means there is a problem.
-func WaitCall(wait bool, params ...string) int {
-	args := params
-	if len(params) == 1 { // tokenize
-		args = strings.Split(params[0], " ")
+// The force parameter controls whether the WaitCall is aborted on error.
+func WaitCall(wait bool, force bool, params ...interface{}) int {
+	args := make([]string, len(params))
+	for i, each := range params {
+		args[i] = paramAsString(each)
 	}
-	log.Println(strings.Join(args, " "))
-	cmd := exec.Command("sh", "-c", strings.Join(args, " "))
+	if len(args) == 1 { // tokenize
+		args = strings.Split(args[0], " ")
+	}
+	log.Println("sh -c", strings.Join(args, " "))
+	cmd := execCommand("sh", "-c", strings.Join(args, " "))
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if wait {
-		if err := cmd.Run(); err != nil {
+		if err := cmd.Run(); err != nil && !force {
 			Fatalln(fmt.Sprintf("[run failed] %v in %s\n", err, Workspace))
 		}
 	} else {
@@ -38,4 +46,14 @@ func WaitCall(wait bool, params ...string) int {
 		return 0
 	}
 	return cmd.Process.Pid
+}
+
+func paramAsString(p interface{}) string {
+	if s, ok := p.(string); ok {
+		return s
+	}
+	if s, ok := p.(fmt.Stringer); ok {
+		return s.String()
+	}
+	return fmt.Sprintf("%v", p)
 }
