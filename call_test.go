@@ -1,6 +1,7 @@
 package muts
 
 import (
+	"bytes"
 	"os/exec"
 	"testing"
 )
@@ -13,7 +14,9 @@ func TestWaitCall(t *testing.T) {
 		cmd = prog
 		return new(exec.Cmd)
 	}
-	WaitCall(true, true, "ls")
+	defer func() { execCommand = exec.Command }()
+	Exec(NewExecOptions("ls").Wait(true).Force(true))
+
 	t.Log(cmd, args)
 	if got, want := cmd, "sh"; got != want {
 		t.Errorf("got %q want %q", got, want)
@@ -23,5 +26,13 @@ func TestWaitCall(t *testing.T) {
 	}
 	if got, want := args[1], "ls"; got != want {
 		t.Errorf("got %q want %q", got, want)
+	}
+}
+
+func TestCaptureOutput(t *testing.T) {
+	capture := new(bytes.Buffer)
+	Exec(NewExecOptions("date").Stdout(capture))
+	if len(capture.String()) == 0 {
+		t.Error("date output expected")
 	}
 }
