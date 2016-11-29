@@ -20,7 +20,9 @@ Example of a make.go
 		RunTasksFromArgs()
 	}
 
-	func taskClean() { ... }
+	func taskClean() {
+		Call("rm -rf target")
+	}
 	func taskBuild() { ... }
 
 Use	it like this
@@ -36,9 +38,9 @@ So why not use the Go language and its rich SDK to write real programs which can
 
 It all started with the Call function that mimics what you would write in a shell script.
 It can be used both with a single line command and one that is composed of a list of strings.
-The CallWait version lets you wait for the program to finish or return the process ID for stopping it later.
+The CallBackground version lets you wait for the program to finish or return the process ID for stopping it later.
 
-	Call("zip", "-q", "-r", fmt.Sprintf("%s/sql/boqs-db-%s.zip", versionDir, *DeployableVersion), ".")
+	Call("zip -q -r", fmt.Sprintf("%s/sql/boqs-db-%s.zip", versionDir, *DeployableVersion), ".")
 
 Next, we added the concept of a simple task (without the dependencies).
 A task is just a no-argument function.

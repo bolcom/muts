@@ -18,6 +18,13 @@ func Call(params ...interface{}) int {
 	return Exec(NewExecOptions(params...))
 }
 
+// CallBackground runs a Command composed of the parameters given.
+// If only one parameter is given then interpret that as a single command line.
+// Return the PID of the process that was started or 0 if problem occurred
+func CallBackground(params ...interface{}) int {
+	return Exec(NewExecOptions(params...).Wait(false))
+}
+
 // ExecOptions is a parameter object for the Exec call
 type ExecOptions struct {
 	parameters []interface{}
@@ -28,36 +35,43 @@ type ExecOptions struct {
 	errput     io.Writer
 }
 
+// Wait sets whether the call should wait for the command to complete. Default is true.
 func (o *ExecOptions) Wait(w bool) *ExecOptions {
 	o.wait = w
 	return o
 }
 
+// Wait sets whether the call should proceed if the call fails. Default is false.
 func (o *ExecOptions) Force(f bool) *ExecOptions {
 	o.force = f
 	return o
 }
 
+// Stdout sets the writer for capturing the output produced by the command.
 func (o *ExecOptions) Stdout(w io.Writer) *ExecOptions {
 	o.output = w
 	return o
 }
 
+// Stderr sets the writer for capturing the output produced by the command.
 func (o *ExecOptions) Stderr(w io.Writer) *ExecOptions {
 	o.errput = w
 	return o
 }
 
+// Stderr sets the reader for accepting the input needed by the command.
 func (o *ExecOptions) Stdin(r io.Reader) *ExecOptions {
 	o.input = r
 	return o
 }
 
+// Parameters sets the command and arguments. Can be a combination of values that are Stringers.
 func (o *ExecOptions) Parameters(params ...interface{}) *ExecOptions {
 	o.parameters = params
 	return o
 }
 
+// NewExecOptions returns a new ExecOptions to be used in a Exec function call.
 func NewExecOptions(params ...interface{}) *ExecOptions {
 	return &ExecOptions{
 		parameters: params,
