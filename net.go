@@ -35,3 +35,20 @@ func FreePort() int {
 	i, _ := strconv.Atoi(t[len(t)-1])
 	return i
 }
+
+// Port returns a free TCP port from the OS or the argument value if the -local flag was set.
+func Port(local int) int {
+	if *LocalUse {
+		return local
+	}
+	return FreePort()
+}
+
+// PortRegistry holds a mapping for resources and their assigned TCP ports
+var PortRegistry = map[string]int{}
+
+// RegisterPort adds a mapping for resource->port and returns that value
+func RegisterPort(label string, port int) int {
+	PortRegistry[label] = port
+	return port
+}
