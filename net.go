@@ -36,19 +36,19 @@ func FreePort() int {
 	return i
 }
 
-// Port returns a free TCP port from the OS or the argument value if the -local flag was set.
-func Port(local int) int {
+// Port registers and returns a free TCP port from the OS or the argument value if the -local flag was set.
+func Port(label string, local int) int {
 	if *LocalUse {
+		PortRegistry[label] = local
 		return local
 	}
-	return FreePort()
+	if i, ok := PortRegistry[label]; ok {
+		return i
+	}
+	i := FreePort()
+	PortRegistry[label] = i
+	return i
 }
 
 // PortRegistry holds a mapping for resources and their assigned TCP ports
 var PortRegistry = map[string]int{}
-
-// RegisterPort adds a mapping for resource->port and returns that value
-func RegisterPort(label string, port int) int {
-	PortRegistry[label] = port
-	return port
-}
