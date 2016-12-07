@@ -9,11 +9,17 @@ import (
 	"strings"
 )
 
-// Tasks holds a mapping between task names and the function to call for running it.
+// DEPRECATED : use Task(string,func()) instead
 var Tasks = map[string]func(){}
 
 // LocalUse holds the value for the -local flag (default is false)
 var LocalUse = flag.Bool("local", false, "Run all on your local machine")
+
+// Task registers a function that can be called using a name as argument of the program (or via RunTask).
+func Task(name string, f func()) {
+	// for now, use a map, this may change
+	Tasks[name] = f
+}
 
 // RunTasks runs all the named tasks in order.
 // If only one string is given then interpret that as a composition of names separated by spaces.
@@ -25,7 +31,7 @@ func RunTasks(names ...string) {
 		for _, name := range strings.Split(each, " ") {
 			task, ok := Tasks[name]
 			if ok {
-				log.Printf("task [%s] in %s\n", name, Workspace)
+				log.Printf("\n----------------------\n task %q in %s\n----------------------\n", name, Workspace)
 				Chdir(Workspace)
 				task()
 			} else {
@@ -37,6 +43,7 @@ func RunTasks(names ...string) {
 
 // RunTasksFromArgs reads the command line and runs each named task.
 // A task name is an argument that does not start with a dash "-"
+// Make sure any flags are specified before the task names.
 func RunTasksFromArgs() {
 	if len(os.Args) == 1 {
 		PrintTasks()

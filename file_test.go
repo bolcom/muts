@@ -22,7 +22,7 @@ func TestCreateFileWith(t *testing.T) {
 
 func TestCreateFileWith_Fail(t *testing.T) {
 	caught := false
-	Fatalln = func(args ...interface{}) {
+	Abort = func(args ...interface{}) {
 		caught = true
 	}
 	CreateFileWith("/usr", "garbage")

@@ -14,9 +14,11 @@ Example of a make.go
 
 	func main() {
 		flag.Parse()
-		Tasks["clean"] = taskClean
-		Tasks["readme"] = func() { Call("cp -v readme.md ./target/") }
-		Tasks["build"] = taskBuild
+
+		Task("clean", taskClean)
+		Task("readme", func() { Call("cp -v readme.md ./target/") } )
+		Task("build", taskBuild)
+
 		RunTasksFromArgs()
 	}
 
@@ -52,7 +54,29 @@ The last feature to mention is the Workspace variable that refers to the directo
 Task execution may change this directory (Chdir) so to keep things simpler, the current directory is reset after each task.
 
 Most functions will produce a log entry.
-If an error occurs then the program exits (calling the Fatalln function).
+If an error occurs then the program exits (calling the Abort function).
 
+
+Defer tasks
+
+You can put tasks on a global defer list which are run just before a program exits.
+This can be useful to stop processes that were started during the make even
+when tasks fail to run and ask to abort the program.
+
+E.g. you start multiple Docker containers using different tasks for a local testing environment.
+Then you run your tests but they fail and you want to abort the build.
+All running containers must be stopped before exiting the build program.
+To add a task to the defer list
+
+	Defer("stop-my-container")
+
+To run all deferred tasks you call
+
+	func main() {
+		//... register your tasks
+
+		defer CallDeferTasks()
+		RunTasksFromArgs()
+	}
 */
 package muts

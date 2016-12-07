@@ -101,7 +101,7 @@ func Exec(options *ExecOptions) int {
 	cmd.Stderr = options.errput
 	if options.wait {
 		if err := cmd.Run(); err != nil && !options.force {
-			Fatalln(fmt.Sprintf("[run failed] %v -> %v, %v in %s\n", options.parameters, cmd.Args, err, Workspace))
+			Abort(fmt.Sprintf("[run failed] %v -> %v, %v in %s\n", options.parameters, cmd.Args, err, Workspace))
 		}
 	} else {
 		if err := cmd.Start(); err != nil {

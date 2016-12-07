@@ -11,7 +11,7 @@ import (
 func LocalIP() string {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
-		Fatalln("unable to get interface addresses", err)
+		Abort("unable to get interface addresses", err)
 	}
 	for _, address := range addrs {
 		// check the address type and if it is not a loopback the display it
@@ -28,7 +28,7 @@ func LocalIP() string {
 func FreePort() int {
 	l, err := net.Listen("tcp", "")
 	if err != nil {
-		Fatalln("unable to get listener for tcp", err)
+		Abort("unable to get listener for tcp", err)
 	}
 	defer l.Close()
 	t := strings.Split(l.Addr().String(), ":")
