@@ -27,7 +27,7 @@ func Defer(task string) {
 	deferList.add(task)
 }
 
-// CallDeferTasks() runs each task from the list. After this the list is empty.
-func CallDeferTasks() {
+// RunDeferTasks() runs each task from the list. After this the list is empty.
+func RunDeferTasks() {
 	deferList.run()
 }

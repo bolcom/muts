@@ -75,7 +75,7 @@ To run all deferred tasks you call
 	func main() {
 		//... register your tasks
 
-		defer CallDeferTasks()
+		defer RunDeferTasks()
 		RunTasksFromArgs()
 	}
 */
