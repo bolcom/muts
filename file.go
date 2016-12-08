@@ -1,17 +1,11 @@
 package muts
 
 import (
-	"fmt"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
 )
-
-// Abort is the function that is called if any error was detected. You can inject your own here
-var Abort = func(v ...interface{}) {
-	panic(fmt.Sprint(v...))
-}
 
 // Workspace holds the current working directory on startup.
 var Workspace, _ = os.Getwd()

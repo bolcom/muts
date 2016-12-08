@@ -9,6 +9,10 @@ import (
 	"strings"
 )
 
+// Abort is the function that is called if any error was detected.
+// You can inject your own here but make sure to set it before calling any Defer(task).
+var Abort = log.Fatalln
+
 // DEPRECATED : use Task(string,func()) instead
 var Tasks = map[string]func(){}
 
@@ -17,7 +21,7 @@ var LocalUse = flag.Bool("local", false, "Run all on your local machine")
 
 // Task registers a function that can be called using a name as argument of the program (or via RunTask).
 func Task(name string, f func()) {
-	// for now, use a map, this may change
+	// for now, use a map of string->func, this may change
 	Tasks[name] = f
 }
 
@@ -43,8 +47,9 @@ func RunTasks(names ...string) {
 
 // RunTasksFromArgs reads the command line and runs each named task.
 // A task name is an argument that does not start with a dash "-"
-// Make sure any flags are specified before the task names.
+// Make sure any flags are on the commandline are present before the task names.
 func RunTasksFromArgs() {
+	defer deferList.run()
 	if len(os.Args) == 1 {
 		PrintTasks()
 		fmt.Println()

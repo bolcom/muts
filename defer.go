@@ -4,6 +4,8 @@ import "sync"
 
 var deferList = new(deferFuncs)
 
+var abortHook = new(sync.Once)
+
 type deferFuncs struct {
 	sync.Mutex
 	tasks []string
@@ -12,7 +14,7 @@ type deferFuncs struct {
 func (d *deferFuncs) add(task string) {
 	d.Lock()
 	defer d.Unlock()
-	d.tasks = append(d.tasks, task)
+	d.tasks = append([]string{task}, d.tasks...)
 }
 
 func (d *deferFuncs) run() {
@@ -22,12 +24,14 @@ func (d *deferFuncs) run() {
 	d.tasks = []string{}
 }
 
-// Defer adds a task to the list of tasks that are run when CallDeferTasks is called
+// Defer adds a task to the list of tasks that are run when Abort or panic is called.
 func Defer(task string) {
+	abortHook.Do(func() {
+		oldAbort := Abort
+		Abort = func(v ...interface{}) {
+			deferList.run()
+			oldAbort(v...)
+		}
+	})
 	deferList.add(task)
-}
-
-// RunDeferTasks() runs each task from the list. After this the list is empty.
-func RunDeferTasks() {
-	deferList.run()
 }

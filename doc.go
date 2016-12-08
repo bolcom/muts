@@ -66,17 +66,10 @@ when tasks fail to run and ask to abort the program.
 E.g. you start multiple Docker containers using different tasks for a local testing environment.
 Then you run your tests but they fail and you want to abort the build.
 All running containers must be stopped before exiting the build program.
-To add a task to the defer list
+You can add a task to the defer list which is run when a task is abort or when the program panics.
 
 	Defer("stop-my-container")
 
-To run all deferred tasks you call
-
-	func main() {
-		//... register your tasks
-
-		defer RunDeferTasks()
-		RunTasksFromArgs()
-	}
+All deferred tasks are run as part of the call to RunTasksFromArgs.
 */
 package muts
