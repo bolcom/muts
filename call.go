@@ -94,18 +94,18 @@ func Exec(options *ExecOptions) int {
 		args = strings.Split(args[0], " ")
 	}
 	cmdline := strings.Join(args, " ")
-	log.Println("sh -c", cmdline)
+	log.Println("[sh -c]", cmdline)
 	cmd := execCommand("sh", "-c", cmdline)
 	cmd.Stdin = options.input
 	cmd.Stdout = options.output
 	cmd.Stderr = options.errput
 	if options.wait {
 		if err := cmd.Run(); err != nil && !options.force {
-			Abort(fmt.Sprintf("[run failed] %v -> %v, %v in %s\n", options.parameters, cmd.Args, err, Workspace))
+			Abort(fmt.Sprintf("[muts.Exec failed]\n\tcommand:%v\n\terror:%v\n\tworkspace:%s\n", options.parameters, err, Workspace))
 		}
 	} else {
 		if err := cmd.Start(); err != nil {
-			log.Println("[run on background failed] " + err.Error())
+			log.Println("[muts.Exec on background failed] " + err.Error())
 		}
 	}
 	if cmd.Process == nil {
