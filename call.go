@@ -101,7 +101,8 @@ func Exec(options *ExecOptions) int {
 	cmd.Stderr = options.errput
 	if options.wait {
 		if err := cmd.Run(); err != nil && !options.force {
-			Abort(fmt.Sprintf("[muts.Exec failed]\n\tcommand:%v\n\terror:%v\n\tworkspace:%s\n", options.parameters, err, Workspace))
+			log.Printf("[muts.Exec failed]\n\tcommand:%v\n\terror:%v\n\tworkspace:%s\n", options.parameters, err, Workspace)
+			return 0
 		}
 	} else {
 		if err := cmd.Start(); err != nil {
