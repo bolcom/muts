@@ -29,8 +29,8 @@ func Defer(task string) {
 	abortHook.Do(func() {
 		oldAbort := Abort
 		Abort = func(v ...interface{}) {
-			deferList.run()
 			oldAbort(v...)
+			deferList.run()
 		}
 	})
 	deferList.add(task)
