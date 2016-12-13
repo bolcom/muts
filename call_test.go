@@ -1,7 +1,6 @@
 package muts
 
 import (
-	"bytes"
 	"os/exec"
 	"testing"
 )
@@ -30,9 +29,9 @@ func TestWaitCall(t *testing.T) {
 }
 
 func TestCaptureOutput(t *testing.T) {
-	capture := new(bytes.Buffer)
-	Exec(NewExecOptions("date").Stdout(capture))
-	if len(capture.String()) == 0 {
-		t.Error("date output expected")
+	out, err := CallReturn("date")
+	if err != nil {
+		t.Error("date output expected", err)
 	}
+	t.Log("stdout", out)
 }

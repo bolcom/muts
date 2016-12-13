@@ -1,6 +1,8 @@
 package muts
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -11,18 +13,54 @@ import (
 
 var execCommand = exec.Command
 
-// Call runs a Command composed of the parameters given.
+// Call runs an operating system command composed of the parameters given.
 // If only one parameter is given then interpret that as a single command line.
-// Abort the program if a call fails.
+// Block until the command has finished.
+// Calls Abort if the call failed.
 func Call(params ...interface{}) int {
-	return Exec(NewExecOptions(params...))
+	r := Exec(NewExecOptions(params...))
+	if !r.Ok() {
+		Abort(r.Error)
+	}
+	return r.PID
 }
 
-// CallBackground runs a Command composed of the parameters given.
+// CallReturn runs an operating system command composed of the parameters given.
 // If only one parameter is given then interpret that as a single command line.
-// Return the PID of the process that was started or 0 if problem occurred
-func CallBackground(params ...interface{}) int {
+// Block until the command has finished.
+// Returns what is written to stdout or to stderror if an error was detected.
+func CallReturn(params ...interface{}) (string, error) {
+	errBuffer := new(bytes.Buffer)
+	outBuffer := new(bytes.Buffer)
+	opts := NewExecOptions(params...)
+	opts.Stderr(errBuffer)
+	opts.Stdout(outBuffer)
+	r := Exec(opts)
+	if !r.Ok() {
+		return outBuffer.String() + "\n" + errBuffer.String(), errors.New(r.Error)
+	}
+	return outBuffer.String(), nil
+}
+
+// CallBackground runs an operating system command composed of the parameters given.
+// If only one parameter is given then interpret that as a single command line.
+// The output (stderr and stdout) of the result will be empty.
+// Does not block ; this function returns immediately. Use the PID value of the result to handle the process.
+func CallBackground(params ...interface{}) ExecResult {
 	return Exec(NewExecOptions(params...).Wait(false))
+}
+
+// ExecResult holds the result of a Call.
+type ExecResult struct {
+	PID    int
+	Error  string
+	Stderr string
+	Stdout string
+}
+
+// Ok returns whether the call was succesful. Only valid is the call was not run in the background.
+func (r ExecResult) Ok() bool {
+	return r.PID != 0
 }
 
 // ExecOptions is a parameter object for the Exec call
@@ -85,7 +123,7 @@ func NewExecOptions(params ...interface{}) *ExecOptions {
 
 // Exec runs a shell command with parameters and settings from CallOptions
 // Returns the process ID if not waiting and then 0 means there is a problem.
-func Exec(options *ExecOptions) int {
+func Exec(options *ExecOptions) ExecResult {
 	args := make([]string, len(options.parameters))
 	for i, each := range options.parameters {
 		args[i] = paramAsString(each)
@@ -101,19 +139,22 @@ func Exec(options *ExecOptions) int {
 	cmd.Stderr = options.errput
 	if options.wait {
 		if err := cmd.Run(); err != nil && !options.force {
-			log.Printf("[muts.Exec failed]\n\tcommand:%v\n\terror:%v\n\tworkspace:%s\n", options.parameters, err, Workspace)
-			return 0
+			return ExecResult{
+				Error: err.Error(),
+			}
 		}
 	} else {
 		if err := cmd.Start(); err != nil {
-			log.Println("[muts.Exec on background failed] " + err.Error())
+			return ExecResult{
+				Error: err.Error(),
+			}
 		}
 	}
 	if cmd.Process == nil {
-		// if we don't know
-		return 0
+		// if we don't know why
+		return ExecResult{}
 	}
-	return cmd.Process.Pid
+	return ExecResult{PID: cmd.Process.Pid}
 }
 
 func paramAsString(p interface{}) string {
