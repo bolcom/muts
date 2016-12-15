@@ -1,8 +1,12 @@
 package muts
 
 import (
+	"bytes"
+	"fmt"
 	"os/exec"
+	"strings"
 	"testing"
+	"time"
 )
 
 func TestWaitCall(t *testing.T) {
@@ -33,5 +37,35 @@ func TestCaptureOutput(t *testing.T) {
 	if err != nil {
 		t.Error("date output expected", err)
 	}
-	t.Log("stdout", out)
+	if !strings.Contains(out, fmt.Sprint(time.Now().Year())) {
+		t.Errorf("got %q", out)
+	}
+}
+
+func TestExecNonSilent(t *testing.T) {
+	outBuffer := new(bytes.Buffer)
+	result := Exec(NewExecOptions("echo TEST").Stdout(outBuffer).Silent(false))
+	if !strings.Contains(outBuffer.String(), "TEST") {
+		t.Errorf("got [%q] wanted at least [%q]", result, "TEST")
+	}
+
+	outBuffer = new(bytes.Buffer)
+	result = Exec(NewExecOptions("echo TEST").Stdout(outBuffer).Silent(true))
+	if strings.Contains(outBuffer.String(), "TEST") {
+		t.Errorf("got [%q] wanted at least [%q]", result, "TEST")
+	}
+
+}
+func TestExecSilentError(t *testing.T) {
+	errBuffer := new(bytes.Buffer)
+	result := Exec(NewExecOptions("echo TEST", " 1>&2 ").Stderr(errBuffer).Silent(false))
+	if !strings.Contains(errBuffer.String(), "TEST") {
+		t.Errorf("got [%q] wanted at least [%q]", result, "TEST")
+	}
+
+	errBuffer = new(bytes.Buffer)
+	result = Exec(NewExecOptions("echo TEST", " 1>&2 ").Stderr(errBuffer).Silent(true))
+	if strings.Contains(errBuffer.String(), "TEST") {
+		t.Errorf("got [%q] wanted at least [%q]", result, "TEST")
+	}
 }

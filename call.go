@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -79,9 +80,20 @@ func (o *ExecOptions) Wait(w bool) *ExecOptions {
 	return o
 }
 
-// Wait sets whether the call should proceed if the call fails. Default is false.
+// Force determines if the program should continue when the cmd fails. If false the application will abort and defers
+// are fired. Default is false.
 func (o *ExecOptions) Force(f bool) *ExecOptions {
 	o.force = f
+	return o
+}
+
+// When Silent is set to true stdout and stderr will be discarded. Otherwise it is streamed as usual. Default is false.
+// especially useful combined with force when you know you want re-runnable commands.
+func (o *ExecOptions) Silent(s bool) *ExecOptions {
+	if s {
+		o.output = ioutil.Discard
+		o.errput = ioutil.Discard
+	}
 	return o
 }
 
@@ -135,6 +147,7 @@ func Exec(options *ExecOptions) ExecResult {
 	log.Println("[sh -c]", cmdline)
 	cmd := execCommand("sh", "-c", cmdline)
 	cmd.Stdin = options.input
+
 	cmd.Stdout = options.output
 	cmd.Stderr = options.errput
 	if options.wait {
