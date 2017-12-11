@@ -51,5 +51,5 @@ func Chdir(whereto string) {
 	if err != nil {
 		Abort("Chdir failed:", err)
 	}
-	log.Printf("changed workdir: [%s] -> [%s]", here, abs)
+	PrintfFunc("changed workdir: [%s] -> [%s]", here, abs)
 }

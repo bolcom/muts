@@ -12,6 +12,9 @@ import (
 	"strings"
 )
 
+// Printf is used to log and is default set to log.Printf
+var PrintfFunc = log.Printf
+
 var execCommand = exec.Command
 
 // Call runs an operating system command composed of the parameters given.
@@ -54,10 +57,11 @@ func CallBackground(params ...interface{}) ExecResult {
 
 // ExecResult holds the result of a Call.
 type ExecResult struct {
-	PID    int
-	Error  string
-	Stderr string
-	Stdout string
+	PID         int
+	CommandLine string
+	Error       string
+	Stderr      string
+	Stdout      string
 }
 
 // Ok returns whether the call was succesful. Only valid is the call was not run in the background.
@@ -145,7 +149,7 @@ func Exec(options *ExecOptions) ExecResult {
 		args = strings.Split(args[0], " ")
 	}
 	cmdline := strings.Join(args, " ")
-	log.Println("[sh -c]", cmdline)
+	PrintfFunc("[sh -c] %s", cmdline)
 	cmd := execCommand("sh", "-c", cmdline)
 	cmd.Stdin = options.input
 
@@ -168,7 +172,7 @@ func Exec(options *ExecOptions) ExecResult {
 		// if we don't know why
 		return ExecResult{}
 	}
-	return ExecResult{PID: cmd.Process.Pid}
+	return ExecResult{PID: cmd.Process.Pid, CommandLine: cmdline}
 }
 
 func paramAsString(p interface{}) string {

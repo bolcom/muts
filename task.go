@@ -35,11 +35,11 @@ func RunTasks(names ...string) {
 		for _, name := range strings.Split(each, " ") {
 			task, ok := Tasks[name]
 			if ok {
-				log.Printf("\n----------------------\n task %q in %s\n----------------------\n", name, Workspace)
+				PrintfFunc("\n----------------------\n task %q in %s\n----------------------\n", name, Workspace)
 				Chdir(Workspace)
 				task()
 			} else {
-				log.Printf("[RunTasks failed] unknown task %q", name)
+				PrintfFunc("[RunTasks failed] unknown task %q", name)
 			}
 		}
 	}
