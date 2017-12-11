@@ -30,6 +30,7 @@ func Call(params ...interface{}) int {
 // If only one parameter is given then interpret that as a single command line.
 // Block until the command has finished.
 // Returns what is written to stdout or to stderror if an error was detected.
+// The last newline(s) (if any) are stripped.
 func CallReturn(params ...interface{}) (string, error) {
 	errBuffer := new(bytes.Buffer)
 	outBuffer := new(bytes.Buffer)
@@ -40,7 +41,7 @@ func CallReturn(params ...interface{}) (string, error) {
 	if !r.Ok() {
 		return outBuffer.String() + "\n" + errBuffer.String(), errors.New(r.Error)
 	}
-	return outBuffer.String(), nil
+	return strings.TrimRight(outBuffer.String(), "\n"), nil
 }
 
 // CallBackground runs an operating system command composed of the parameters given.
