@@ -1,7 +1,6 @@
 package muts
 
 import (
-	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -17,11 +16,11 @@ func CreateFileWith(filename, contents string) {
 		Abort("CreateFileWith failed:", err)
 	}
 	defer f.Close()
-	_, err = io.WriteString(f, contents)
+	n, err := f.WriteString(contents)
 	if err != nil {
 		Abort("CreateFileWith failed:", err)
 	}
-	log.Printf("written %d bytes to %s\n", len(contents), filename) // show absolute name
+	log.Printf("written %d/%d bytes to %s\n", n, len(contents), filename) // show absolute name
 }
 
 // Setenv wraps the os one to check and log it
