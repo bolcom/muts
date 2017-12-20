@@ -53,3 +53,13 @@ func Chdir(whereto string) {
 	}
 	PrintfFunc("changed workdir: [%s] -> [%s]", here, abs)
 }
+
+// Mkdir wraps os.MkdirAll to check and log it.
+func Mkdir(path string) {
+	abs, err := filepath.Abs(path)
+	err = os.MkdirAll(abs, os.ModePerm)
+	if err != nil {
+		Abort("Mkdir failed:", err)
+	}
+	PrintfFunc("created dir: [%s]", abs)
+}
