@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	. "github.com/bolcom/muts"
+	. "github.com/emicklei/muts"
 )
 
 // go run defer.go fail
