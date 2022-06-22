@@ -1,3 +1,3 @@
-module github.com/emicklei/muts
+module github.com/bolcom/muts
 
 go 1.18
