@@ -13,8 +13,7 @@ import (
 // You can inject your own here but make sure to set it before calling any Defer(task).
 var Abort = log.Fatalln
 
-// DEPRECATED : use Task(string,func()) instead
-var Tasks = map[string]func(){}
+var tasks = map[string]func(){}
 
 // LocalUse holds the value for the -local flag (default is false)
 var LocalUse = flag.Bool("local", false, "Run all on your local machine")
@@ -22,7 +21,7 @@ var LocalUse = flag.Bool("local", false, "Run all on your local machine")
 // Task registers a function that can be called using a name as argument of the program (or via RunTask).
 func Task(name string, f func()) {
 	// for now, use a map of string->func, this may change
-	Tasks[name] = f
+	tasks[name] = f
 }
 
 // RunTasks runs all the named tasks in order.
@@ -33,7 +32,7 @@ func RunTasks(names ...string) {
 	defer Chdir(Workspace)
 	for _, each := range names {
 		for _, name := range strings.Split(each, " ") {
-			task, ok := Tasks[name]
+			task, ok := tasks[name]
 			if ok {
 				PrintfFunc("\n----------------------\n task %q in %s\n----------------------\n", name, Workspace)
 				Chdir(Workspace)
@@ -67,7 +66,7 @@ func RunTasksFromArgs() {
 // PrintTasks lists (in sort order) the names of all registered tasks.
 func PrintTasks() {
 	names := []string{}
-	for each, _ := range Tasks {
+	for each, _ := range tasks {
 		names = append(names, each)
 	}
 	sort.Strings(names)
