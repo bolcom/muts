@@ -62,3 +62,15 @@ func TestRunTasksFromArgsWithFlagAtEnd(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestRunTasksFromArgsWithBoolFlag(t *testing.T) {
+	testHasRun := false
+	Task("test", func() {
+		testHasRun = true
+	})
+	os.Args = []string{"muts", "-v=true", "test"}
+	RunTasksFromArgs()
+	if !testHasRun {
+		t.Fail()
+	}
+}
