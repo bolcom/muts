@@ -45,8 +45,7 @@ func RunTasks(names ...string) {
 }
 
 // RunTasksFromArgs reads the command line and runs each named task.
-// A task name is an argument that does not start with a dash "-"
-// Make sure any flags are on the commandline are present before the task names.
+// A task name is an argument that does not start with a dash "-".
 func RunTasksFromArgs() {
 	defer deferList.run()
 	if len(os.Args) == 1 {
@@ -57,8 +56,12 @@ func RunTasksFromArgs() {
 	}
 	for i := 1; i < len(os.Args); i++ {
 		each := os.Args[i]
-		if !strings.HasPrefix(each, "-") {
-			RunTasks(os.Args[i])
+		if strings.HasPrefix(each, "-") {
+			if !strings.Contains(each, "=") {
+				i++ // next is flag argument
+			}
+		} else {
+			RunTasks(each)
 		}
 	}
 }
